@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "585756943906",
+    "project_id": "loginmodule-764aa",
+    "storage_bucket": "loginmodule-764aa.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:585756943906:android:4e08d8ca077c3589440c7b",
+        "android_client_info": {
+          "package_name": "com.amnapp.loginmodule"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "585756943906-2mokaibdd3q2hoqtfkbda3deav5vf81c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDuCHuM7m9yez6oFpYPY2KveeIN70cSZR8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "585756943906-2mokaibdd3q2hoqtfkbda3deav5vf81c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
