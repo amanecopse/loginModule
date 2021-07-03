@@ -38,7 +38,6 @@ class InviteCodeIssueActivity : AppCompatActivity() {
             binding.issuingLl.isClickable = true //연타방지 해제
 
             binding.issuingLl.setOnClickListener{
-            //todo 버그!! 발급하고 나갔다가 바로 다시 들어오면 미발급 화면으로 나와있음 + 발급을 완료하고 보면 UserData.mUserData가 삭제되어있다
                 val am = AccountManager()
                 if(!am.checkNetworkState(this)){//네트워크 연결 체크
                     showDialogMessage("네트워크 오류", "네트워크 연결 상태를 확인해 주세요")

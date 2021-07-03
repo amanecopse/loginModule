@@ -16,7 +16,6 @@ import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import java.nio.charset.Charset
 import java.security.MessageDigest
-import java.util.*
 
 class AccountManager {
     var db = Firebase.firestore
@@ -40,9 +39,11 @@ class AccountManager {
         goalOfShuttleRunRank: String? = null,
         goalOfFieldTrainingRank: String? = null
     ){
-        val confirmHashCode: String? = hash(id+pw+groupCode) ?: null.also{
-            Log.d("AccountManager", "본인확인코드 생성오류")
-        }
+
+        val activity = context as SignInActivity
+        activity.binding.confirmLL.isClickable = false //연타방지
+
+        val confirmHashCode = hash(id+pw+groupCode)
         val ud = UserData() //getInstance()로 얻어낼 경우 이전 로그인 객체를 불러올 위험이 있으므로 빈 객체 생성
         var isValid: Boolean = true
         ud.id = id
@@ -69,16 +70,95 @@ class AccountManager {
                 .addOnSuccessListener {
                     Log.d(TAG, "DocumentSnapshot successfully written!")
                     Toast.makeText(context, "가입성공", Toast.LENGTH_SHORT).show()
-                    val activity = context as SignInActivity
                     activity.finish()
                 }
                 .addOnFailureListener {e ->
                     Log.w(TAG, "Error writing document", e)
                     Toast.makeText(context, "가입실패", Toast.LENGTH_SHORT).show()
-                    val activity = context as SignInActivity
                     activity.finish()
                 }
         }
+    }
+
+    fun signInWithInvite(
+        context: Context,
+        id: String,
+        pw: String,
+        groupCode: String,
+        hostId: String,
+        inviteCode: String,
+        userName: String,
+        userHeight: Int,
+        userWeight: Int,
+
+        userAge: Int? = null,
+        militaryId: Int? = null,
+        userBloodType: String? = null,
+
+        goalOfWeight: Int? = null,
+        goalOfTotalRank: String? = null,
+        goalOfLegTuckRank: String? = null,
+        goalOfShuttleRunRank: String? = null,
+        goalOfFieldTrainingRank: String? = null
+    ) {
+
+        val activity = context as SignInActivity
+        activity.binding.confirmLL.isClickable = false //연타방지
+
+        val inviteHashCode = hash(hostId+inviteCode+groupCode)
+        val confirmHashCode = hash(id+pw+groupCode)
+        db.collection("users").whereEqualTo("inviteHashCode",inviteHashCode)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+
+                if(querySnapshot.isEmpty){// 초대해시코드로 못찾음 -> 초대자id,초대코드,그룹코드 3중하나 잘못입력
+                    val activity = context as SignInActivity
+                    activity.showDialogMessage("초대자 정보가 유효하지 않습니다", "초대코드, 초대자 id 또는 그룹코드가 잘못 입력 되었습니다")
+                    activity.binding.confirmLL.isClickable = true //연타방지해제
+                    return@addOnSuccessListener
+                }
+
+                val newUd = querySnapshot.documents[0].toObject<UserData>()
+                if (newUd != null) {
+                    newUd.id = id
+                    newUd.pw = pw
+                    newUd.confirmHashCode = confirmHashCode
+                    newUd.inviteHashCode = null
+                    newUd.userName = userName
+                    newUd.userHeight = userHeight
+                    newUd.userWeight = userWeight
+                    newUd.userAge = userAge
+                    newUd.militaryId = militaryId
+                    newUd.userBloodType = userBloodType
+                    newUd.goalOfWeight = goalOfWeight
+                    newUd.goalOfTotalRank = goalOfTotalRank
+                    newUd.goalOfLegTuckRank = goalOfLegTuckRank
+                    newUd.goalOfShuttleRunRank = goalOfShuttleRunRank
+                    newUd.goalOfFieldTrainingRank = goalOfFieldTrainingRank
+
+                    db.collection("users").document(newUd.indexHashCode.toString())
+                        .set(newUd)
+                        .addOnSuccessListener {
+                            db.collection("users").whereEqualTo("id",hostId)
+                                .get()
+                                .addOnSuccessListener {
+                                    val hostUd = it.documents[0].toObject<UserData>()
+                                    if (hostUd != null) {
+                                        hostUd.inviteHashCode = null //부모의 초대코드 발급 상태를 초기화시킨다
+                                        hostUd.childCount += 1 //부모의 자식 카운트를 1늘려준다
+                                        db.collection("users").document(hostUd.indexHashCode.toString())
+                                            .set(hostUd)
+                                            .addOnSuccessListener {
+                                                Toast.makeText(context, "가입성공", Toast.LENGTH_SHORT).show()
+                                                val activity = context as SignInActivity
+                                                activity.finish()
+                                            }
+                                    }
+                                }
+                        }
+                }
+
+            }
     }
 
     fun login(context: Context, id: String, pw: String, groupCode: String){

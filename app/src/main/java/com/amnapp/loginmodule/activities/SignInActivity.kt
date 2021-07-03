@@ -3,18 +3,16 @@ package com.amnapp.loginmodule.activities
 import android.content.DialogInterface
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import com.amnapp.loginmodule.AccountManager
-import com.amnapp.loginmodule.UserData
 import com.amnapp.loginmodule.databinding.ActivitySignInBinding
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
 class SignInActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivitySignInBinding
+    lateinit var binding: ActivitySignInBinding
     val db = Firebase.firestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,12 +63,29 @@ class SignInActivity : AppCompatActivity() {
                                     ||binding.inviteCodeEt.text.isNullOrBlank())
                         }
 
-                        if(isValid){
-                            if(binding.isInvitedCb.isChecked){//todo 초대받은 신규가입 구현
-
+                        if(isValid){//회원가입 폼이 유효한지 검사
+                            if(binding.isInvitedCb.isChecked){//초대받은 신규가입 구현
+                                am.signInWithInvite(
+                                    this
+                                    ,binding.idEt.text.toString()
+                                    ,binding.pwEt.text.toString()
+                                    ,binding.groupCodeEt.text.toString()
+                                    ,binding.hostIdEt.text.toString()
+                                    ,binding.inviteCodeEt.text.toString()
+                                    ,binding.nameEt.text.toString()
+                                    ,binding.heightEt.text.toString().toInt()
+                                    ,binding.weightEt.text.toString().toInt()
+                                    ,if(binding.ageEt.text.toString().isBlank()) null else binding.ageEt.text.toString().toInt()
+                                    ,if(binding.militaryIdEt.text.toString().isBlank()) null else binding.militaryIdEt.text.toString().toInt()
+                                    ,binding.bloodTypeEt.text.toString()
+                                    ,if(binding.goalOfWeightEt.text.toString().isBlank()) null else binding.goalOfWeightEt.text.toString().toInt()
+                                    ,binding.goalOfTotalRankEt.text.toString()
+                                    ,binding.goalOfLegTuckRankEt.text.toString()
+                                    ,binding.goalOfShuttleRunRankEt.text.toString()
+                                    ,binding.goalOfFieldTrainingRankEt.text.toString()
+                                )
                             }
                             else{//초대받지 않은 신규가입
-                                binding.confirmLL.isClickable = false //연타방지
                                 am.signInWithoutInvite(
                                     this
                                     ,binding.idEt.text.toString()
