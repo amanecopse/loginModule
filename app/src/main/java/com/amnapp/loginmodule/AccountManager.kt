@@ -8,6 +8,7 @@ import android.os.Build
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import com.amnapp.loginmodule.activities.InviteCodeIssueActivity
 import com.amnapp.loginmodule.activities.SignInActivity
 import com.amnapp.loginmodule.activity.LoginActivity
 import com.google.firebase.firestore.ktx.firestore
@@ -15,6 +16,7 @@ import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import java.nio.charset.Charset
 import java.security.MessageDigest
+import java.util.*
 
 class AccountManager {
     var db = Firebase.firestore
@@ -38,17 +40,17 @@ class AccountManager {
         goalOfShuttleRunRank: String? = null,
         goalOfFieldTrainingRank: String? = null
     ){
-        val confirmCode: String? = hash(id+pw+groupCode) ?: null.also{
+        val confirmHashCode: String? = hash(id+pw+groupCode) ?: null.also{
             Log.d("AccountManager", "본인확인코드 생성오류")
         }
-        val ud = UserData.getInstance()
+        val ud = UserData() //getInstance()로 얻어낼 경우 이전 로그인 객체를 불러올 위험이 있으므로 빈 객체 생성
         var isValid: Boolean = true
         ud.id = id
         ud.pw = pw
         ud.userName = userName
         ud.userHeight = userHeight
         ud.userWeight = userWeight
-        ud.confirmCode = confirmCode
+        ud.confirmHashCode = confirmHashCode
         ud.isAdmin = true
 
         ud.userAge = userAge
@@ -60,8 +62,8 @@ class AccountManager {
         ud.goalOfShuttleRunRank = goalOfShuttleRunRank
         ud.goalOfFieldTrainingRank = goalOfFieldTrainingRank
 
-        Log.d(TAG, "asd")
         hash(id+pw+userName)?.let {
+            ud.indexHashCode = it
             db.collection("users").document(it)
                 .set(ud)
                 .addOnSuccessListener {
@@ -81,6 +83,7 @@ class AccountManager {
 
     fun login(context: Context, id: String, pw: String, groupCode: String){
         val activity: LoginActivity = context as LoginActivity
+        activity.binding.loginLl.isClickable = false //연타 방지
         db.collection("users").whereEqualTo("id",id)
             .get().addOnSuccessListener {
                 if(it.isEmpty){
@@ -89,10 +92,13 @@ class AccountManager {
                 else{
                     val document = it.documents[0]
                     val ud= document.toObject<UserData>()
-                    val confirmCode = hash(id+pw+groupCode)
+                    val confirmHashCode = hash(id+pw+groupCode)
                     if (ud != null) {
-                        if(ud.confirmCode==confirmCode){
-                            UserData.ud = ud // 서버에서 얻은 객체로 대체
+                        if(ud.confirmHashCode==confirmHashCode){
+                            ud.isLogined = true
+                            UserData.mUserData = ud // 서버에서 얻은 객체로 대체
+                            mGroupCode = groupCode // 그룹코드 저장
+
                             Toast.makeText(context, "로그인 성공", Toast.LENGTH_SHORT).show()
                             activity.binding.loginLl.visibility = View.GONE
                             activity.binding.signInCv.visibility = View.GONE
@@ -107,13 +113,50 @@ class AccountManager {
 
                     }
                 }
-                activity.binding.loginLl.isClickable = true //연타방지 해제
             }
+        activity.binding.loginLl.isClickable = true //연타방지 해제
     }
 
-//    fun issueInviteCode(context: Context, inviteCode: String){
-//
-//    }
+    fun logout(context: Context){
+        val activity = context as LoginActivity
+        val ud = UserData.getInstance()
+        activity.binding.loginLl.visibility = View.VISIBLE
+        activity.binding.signInCv.visibility = View.VISIBLE
+        activity.binding.loginBoxCv.visibility = View.VISIBLE
+        activity.binding.logoutLl.visibility = View.GONE
+        activity.binding.issueCv.visibility = View.GONE
+        activity.binding.loginoutCv.setCardBackgroundColor(Color.WHITE)
+
+        ud.isLogined = false
+
+    }
+
+    fun issueInviteCode(context: Context, inviteCode: String, isAdmin: Boolean){
+        val activity = context as InviteCodeIssueActivity
+        val myUd = UserData.getInstance()
+        val childUd = UserData() // 빈 객체 생성
+        val inviteHashCode = hash(myUd.id+inviteCode+mGroupCode)
+        val childIndexHashCode = hash(myUd.indexHashCode+ mGroupCode+myUd.childCount)
+        val myIndexHashCode = myUd.indexHashCode
+
+        if (childIndexHashCode != null && inviteHashCode != null && myIndexHashCode != null) {
+            childUd.isAdmin = isAdmin
+            childUd.inviteHashCode = inviteHashCode
+            childUd.indexHashCode = childIndexHashCode
+            myUd.inviteHashCode = inviteCode// 초대코드 발급중인 부모계정임을 알리면서 현재 발급중인 코드(해시가 아닌 형태)를 저장
+            //발급한 현재 상태를 서버에 올림
+
+            db.collection("users").document(childIndexHashCode)
+                .set(childUd)
+                .addOnSuccessListener {
+                    db.collection("users").document(myIndexHashCode)
+                        .set(myUd)
+                        .addOnSuccessListener {
+                            activity.showDialogMessage("초대코드 발급 완료", "초대할 유저에게 초대코드를 공유해 주세요"+myUd.inviteHashCode)
+                        }
+                }
+        }
+    }
 
     fun hash(text: String): String? {
         val sha = SHA256()
@@ -138,8 +181,8 @@ class AccountManager {
     }
 
     companion object{
-        var groupCode: String? = null //트리순회에 필요하므로 로그인 시 정적으로 입력할 것
-        val TAG = "AccountManager"
+        var mGroupCode: String? = null //트리순회에 필요하므로 로그인 시 정적으로 입력할 것
+        const val TAG = "AccountManager"
     }
 }
 

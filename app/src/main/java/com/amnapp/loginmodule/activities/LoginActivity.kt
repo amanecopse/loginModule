@@ -4,13 +4,17 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.amnapp.loginmodule.AccountManager
+import com.amnapp.loginmodule.UserData
 import com.amnapp.loginmodule.activities.InviteCodeIssueActivity
 import com.amnapp.loginmodule.activities.SignInActivity
 import com.amnapp.loginmodule.databinding.ActivityLoginBinding
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 
 class LoginActivity : AppCompatActivity() {
 
@@ -26,33 +30,39 @@ class LoginActivity : AppCompatActivity() {
 
     private fun initUI() {
         //초기상태 로그인, 회원가입
-        binding.loginLl.visibility = View.VISIBLE
-        binding.signInCv.visibility = View.VISIBLE
-        binding.logoutLl.visibility = View.GONE
-        binding.issueCv.visibility = View.GONE
-        binding.loginoutCv.setCardBackgroundColor(Color.WHITE)
-
-
-        binding.loginLl.setOnClickListener{
-            val am = AccountManager()
-            am.login(this, binding.idEt.text.toString(), binding.pwEt.text.toString(), binding.groupCodeEt.text.toString())
-            binding.loginLl.isClickable = false //연타 방지
+        val ud = UserData.getInstance()
+        if(ud.isLogined){
+            binding.loginLl.visibility = View.GONE
+            binding.signInCv.visibility = View.GONE
+            binding.logoutLl.visibility = View.VISIBLE
+            binding.issueCv.visibility = View.VISIBLE
+            binding.loginoutCv.setCardBackgroundColor(Color.RED)
         }
-        binding.logoutLl.setOnClickListener {
+        else{
             binding.loginLl.visibility = View.VISIBLE
             binding.signInCv.visibility = View.VISIBLE
-            binding.loginBoxCv.visibility = View.VISIBLE
             binding.logoutLl.visibility = View.GONE
             binding.issueCv.visibility = View.GONE
             binding.loginoutCv.setCardBackgroundColor(Color.WHITE)
         }
+
+        binding.loginLl.setOnClickListener{
+            val am = AccountManager()
+            am.login(this, binding.idEt.text.toString(), binding.pwEt.text.toString(), binding.groupCodeEt.text.toString())
+        }
+        binding.logoutLl.setOnClickListener {
+            val am = AccountManager()
+            am.logout(this)
+        }
         binding.issueLl.setOnClickListener {
-            var intent = Intent(this, InviteCodeIssueActivity::class.java)
+            val intent = Intent(this, InviteCodeIssueActivity::class.java)
             startActivity(intent)
         }
         binding.signInLl.setOnClickListener {
-            var intent = Intent(this, SignInActivity::class.java)
+            val intent = Intent(this, SignInActivity::class.java)
             startActivity(intent)
+        }
+        binding.cancelLl.setOnClickListener {
         }
     }
 

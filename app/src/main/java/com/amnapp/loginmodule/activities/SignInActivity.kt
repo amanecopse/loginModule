@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import com.amnapp.loginmodule.AccountManager
+import com.amnapp.loginmodule.UserData
 import com.amnapp.loginmodule.databinding.ActivitySignInBinding
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -25,8 +26,9 @@ class SignInActivity : AppCompatActivity() {
     }
 
     private fun initUI() {
-        binding.inviteInfoCv.visibility = View.GONE
 
+        //초대받은 회원의 가입 시 보이는 UI의 토글
+        binding.inviteInfoCv.visibility = View.GONE
         binding.isInvitedCb.setOnCheckedChangeListener { buttonView, isChecked ->
             when(isChecked){
                 true -> binding.inviteInfoCv.visibility = View.VISIBLE

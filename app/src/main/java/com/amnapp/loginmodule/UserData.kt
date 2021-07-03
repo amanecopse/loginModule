@@ -1,14 +1,11 @@
 package com.amnapp.loginmodule
 
-data class UserData(var _ud: UserData? = null){
-    init {
-        ud = _ud
-    }
-    var id: String? = null
+data class UserData(var id: String? = null){
     var pw: String? = null
     var childCount: Int = 0
-    var confirmCode: String? = null
-    var inviteCode: String? = null
+    var confirmHashCode: String? = null
+    var inviteHashCode: String? = null
+    var indexHashCode: String? = null
     var isLogined: Boolean = false
     var isAdmin: Boolean = false
     //아래는 프로필 정보
@@ -26,11 +23,11 @@ data class UserData(var _ud: UserData? = null){
     var goalOfFieldTrainingRank: String? = null
 
     companion object{
-        var ud: UserData? = null
+        var mUserData: UserData? = null
 
         fun getInstance(): UserData{
-            return ud ?: UserData().also{
-                ud = it
+            return mUserData ?: UserData().also{
+                mUserData = it
             }
         }
     }
