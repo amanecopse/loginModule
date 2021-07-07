@@ -115,8 +115,6 @@
         android:layout_width="350dp"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
-        android:layout_marginStart="36dp"
-        android:layout_marginEnd="51dp"
         android:layout_weight="1"
         android:clickable="false"
         app:cardBackgroundColor="@android:color/white"
@@ -155,6 +153,39 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="로그아웃"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/middleText" />
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/adminCv"
+        android:layout_width="350dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="30dp"
+        android:layout_weight="1"
+        android:clickable="false"
+        app:cardBackgroundColor="@android:color/holo_purple"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/loginoutCv">
+
+        <LinearLayout
+            android:id="@+id/adminLl"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="?android:attr/selectableItemBackground"
+            android:clickable="true"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="관리자 페이지"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/middleText" />
         </LinearLayout>

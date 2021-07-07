@@ -14,6 +14,7 @@ import com.amnapp.loginmodule.activity.LoginActivity
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.tasks.await
 import java.nio.charset.Charset
 import java.security.MessageDigest
 
@@ -26,11 +27,11 @@ class AccountManager {
         pw: String,
         groupCode: String,
         userName: String,
+        militaryId: Int,
         userHeight: Int,
         userWeight: Int,
 
         userAge: Int? = null,
-        militaryId: Int? = null,
         userBloodType: String? = null,
 
         goalOfWeight: Int? = null,
@@ -88,11 +89,11 @@ class AccountManager {
         hostId: String,
         inviteCode: String,
         userName: String,
+        militaryId: Int,
         userHeight: Int,
         userWeight: Int,
 
         userAge: Int? = null,
-        militaryId: Int? = null,
         userBloodType: String? = null,
 
         goalOfWeight: Int? = null,
@@ -145,7 +146,6 @@ class AccountManager {
                                     val hostUd = it.documents[0].toObject<UserData>()
                                     if (hostUd != null) {
                                         hostUd.inviteHashCode = null //부모의 초대코드 발급 상태를 초기화시킨다
-                                        hostUd.childCount += 1 //부모의 자식 카운트를 1늘려준다
                                         db.collection("users").document(hostUd.indexHashCode.toString())
                                             .set(hostUd)
                                             .addOnSuccessListener {
@@ -180,11 +180,13 @@ class AccountManager {
                             mGroupCode = groupCode // 그룹코드 저장
 
                             Toast.makeText(context, "로그인 성공", Toast.LENGTH_SHORT).show()
+                            activity.binding.profileCiv.visibility = View.VISIBLE
                             activity.binding.loginLl.visibility = View.GONE
                             activity.binding.signInCv.visibility = View.GONE
                             activity.binding.loginBoxCv.visibility = View.GONE
                             activity.binding.logoutLl.visibility = View.VISIBLE
                             activity.binding.issueCv.visibility = View.VISIBLE
+                            activity.binding.adminCv.visibility = if(ud.isAdmin) View.VISIBLE else View.GONE
                             activity.binding.loginoutCv.setCardBackgroundColor(Color.RED)
                         }
                         else{
@@ -200,11 +202,13 @@ class AccountManager {
     fun logout(context: Context){
         val activity = context as LoginActivity
         val ud = UserData.getInstance()
+        activity.binding.profileCiv.visibility = View.GONE
         activity.binding.loginLl.visibility = View.VISIBLE
         activity.binding.signInCv.visibility = View.VISIBLE
         activity.binding.loginBoxCv.visibility = View.VISIBLE
         activity.binding.logoutLl.visibility = View.GONE
         activity.binding.issueCv.visibility = View.GONE
+        activity.binding.adminCv.visibility = View.GONE
         activity.binding.loginoutCv.setCardBackgroundColor(Color.WHITE)
 
         ud.isLogined = false
@@ -223,24 +227,21 @@ class AccountManager {
             childUd.isAdmin = isAdmin
             childUd.inviteHashCode = inviteHashCode
             childUd.indexHashCode = childIndexHashCode
+            childUd.userName = "초대중인 계정"
             myUd.inviteHashCode = inviteCode// 초대코드 발급중인 부모계정임을 알리면서 현재 발급중인 코드(해시가 아닌 형태)를 저장
-            //발급한 현재 상태를 서버에 올림
 
+            //발급한 현재 상태를 서버에 올림
             db.collection("users").document(childIndexHashCode)
                 .set(childUd)
                 .addOnSuccessListener {
+                    myUd.childCount += 1 //부모의 자식 카운트를 1늘려준다
                     db.collection("users").document(myIndexHashCode)
                         .set(myUd)
                         .addOnSuccessListener {
-                            activity.showDialogMessage("초대코드 발급 완료", "초대할 유저에게 초대코드를 공유해 주세요"+myUd.inviteHashCode)
+                            activity.showDialogMessage("초대코드 발급 완료", "초대할 유저에게 초대코드를 공유해 주세요")
                         }
                 }
         }
-    }
-
-    fun hash(text: String): String? {
-        val sha = SHA256()
-        return sha.encrypt(text)
     }
 
     fun checkNetworkState(context: Context): Boolean {//인터넷 상태를 확인하는 함수
@@ -258,6 +259,32 @@ class AccountManager {
             val nwInfo = connectivityManager.activeNetworkInfo ?: return false
             return nwInfo.isConnected
         }
+    }
+
+    suspend fun findChildAccount(myIndexHashCode: String): MutableList<UserData>{
+        val userList: MutableList<UserData> = mutableListOf()
+        val childCount: Int
+        val myUd = db.collection("users").document(myIndexHashCode).get().await().toObject<UserData>()
+        if (myUd != null) {
+            childCount = myUd.childCount
+            for (i in 0 until childCount){
+                val childUd: UserData?
+                val childIndexHashCode: String?
+                childIndexHashCode = hash(myIndexHashCode+childCount+mGroupCode)
+                childUd =
+                    childIndexHashCode?.let { db.collection("users").document(it).get().await().toObject<UserData>() }
+                if (childUd != null) {
+                    userList.add(childUd)
+                }
+            }
+        }
+
+        return userList
+    }
+
+    fun hash(text: String): String? {
+        val sha = SHA256()
+        return sha.encrypt(text)
     }
 
     companion object{

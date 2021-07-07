@@ -54,13 +54,15 @@ class SignInActivity : AppCompatActivity() {
                                 || binding.pwConfirmEt.text.isNullOrBlank()
                                 || binding.groupCodeEt.text.isNullOrBlank()
                                 || binding.nameEt.text.isNullOrBlank()
+                                || binding.militaryIdEt.text.isNullOrBlank()
                                 || binding.heightEt.text.isNullOrBlank()
                                 || binding.weightEt.text.isNullOrBlank()
                                 || binding.pwEt.text.toString() != binding.pwConfirmEt.text.toString())
 
                         if(binding.isInvitedCb.isChecked){// 체크박스 체크된 경우 초대자 id, 초대코드도 공란 있는 지 검사
                             isValid = !(binding.hostIdEt.text.isNullOrBlank()
-                                    ||binding.inviteCodeEt.text.isNullOrBlank())
+                                    ||binding.inviteCodeEt.text.isNullOrBlank()
+                                    ||!isValid)
                         }
 
                         if(isValid){//회원가입 폼이 유효한지 검사
@@ -73,10 +75,10 @@ class SignInActivity : AppCompatActivity() {
                                     ,binding.hostIdEt.text.toString()
                                     ,binding.inviteCodeEt.text.toString()
                                     ,binding.nameEt.text.toString()
+                                    ,binding.militaryIdEt.text.toString().toInt()
                                     ,binding.heightEt.text.toString().toInt()
                                     ,binding.weightEt.text.toString().toInt()
                                     ,if(binding.ageEt.text.toString().isBlank()) null else binding.ageEt.text.toString().toInt()
-                                    ,if(binding.militaryIdEt.text.toString().isBlank()) null else binding.militaryIdEt.text.toString().toInt()
                                     ,binding.bloodTypeEt.text.toString()
                                     ,if(binding.goalOfWeightEt.text.toString().isBlank()) null else binding.goalOfWeightEt.text.toString().toInt()
                                     ,binding.goalOfTotalRankEt.text.toString()
@@ -92,10 +94,10 @@ class SignInActivity : AppCompatActivity() {
                                     ,binding.pwEt.text.toString()
                                     ,binding.groupCodeEt.text.toString()
                                     ,binding.nameEt.text.toString()
+                                    ,binding.militaryIdEt.text.toString().toInt()
                                     ,binding.heightEt.text.toString().toInt()
                                     ,binding.weightEt.text.toString().toInt()
                                     ,if(binding.ageEt.text.toString().isBlank()) null else binding.ageEt.text.toString().toInt()
-                                    ,if(binding.militaryIdEt.text.toString().isBlank()) null else binding.militaryIdEt.text.toString().toInt()
                                     ,binding.bloodTypeEt.text.toString()
                                     ,if(binding.goalOfWeightEt.text.toString().isBlank()) null else binding.goalOfWeightEt.text.toString().toInt()
                                     ,binding.goalOfTotalRankEt.text.toString()
