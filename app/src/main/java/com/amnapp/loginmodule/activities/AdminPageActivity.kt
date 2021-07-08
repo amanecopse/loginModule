@@ -2,6 +2,7 @@ package com.amnapp.loginmodule.activities
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.viewModels
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
@@ -33,13 +34,14 @@ class AdminPageActivity : AppCompatActivity() {
         viewModel.pathList.observe(this, Observer {
             var path = ""
             for (i in it){
-                path = "/"+i.userName
+                path += "/"+i.userName
             }
             binding.pathEt.setText(path)
         })
         viewModel.subUserList.observe(this, Observer {
             val adminPageRecyclerAdapter = AdminPageRecyclerAdapter(it)
             binding.subUserListRv.adapter = adminPageRecyclerAdapter
+            Log.d("asd", it.toString())
         })
     }
 }

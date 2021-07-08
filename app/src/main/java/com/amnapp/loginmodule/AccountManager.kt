@@ -269,8 +269,7 @@ class AccountManager {
             childCount = myUd.childCount
             for (i in 0 until childCount){
                 val childUd: UserData?
-                val childIndexHashCode: String?
-                childIndexHashCode = hash(myIndexHashCode+childCount+mGroupCode)
+                val childIndexHashCode: String? = hash(myIndexHashCode+childCount+mGroupCode)
                 childUd =
                     childIndexHashCode?.let { db.collection("users").document(it).get().await().toObject<UserData>() }
                 if (childUd != null) {

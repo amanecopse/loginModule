@@ -57,7 +57,9 @@
                         android:layout_height="30dp"
                         android:layout_gravity="center_vertical"
                         android:layout_marginLeft="5dp"
-                        app:srcCompat="@drawable/ic_baseline_arrow_upward_24" />
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        app:srcCompat="@drawable/ic_baseline_arrow_upward_24_gray" />
 
                     <EditText
                         android:id="@+id/pathEt"

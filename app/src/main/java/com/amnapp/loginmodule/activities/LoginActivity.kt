@@ -4,6 +4,7 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -13,6 +14,10 @@ import com.amnapp.loginmodule.activities.AdminPageActivity
 import com.amnapp.loginmodule.activities.InviteCodeIssueActivity
 import com.amnapp.loginmodule.activities.SignInActivity
 import com.amnapp.loginmodule.databinding.ActivityLoginBinding
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.*
+import kotlinx.coroutines.tasks.await
 
 class LoginActivity : AppCompatActivity() {
 

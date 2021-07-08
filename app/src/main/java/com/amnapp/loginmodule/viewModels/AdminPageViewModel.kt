@@ -4,6 +4,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.amnapp.loginmodule.AccountManager
 import com.amnapp.loginmodule.UserData
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class AdminPageViewModel: ViewModel() {
@@ -15,9 +18,9 @@ class AdminPageViewModel: ViewModel() {
     init {
         parentName.value = myUd.userName
         pathList.value = mutableListOf(myUd)
-        runBlocking {
+        CoroutineScope(Dispatchers.IO).launch{
             val am = AccountManager()
-            subUserList.value = myUd.indexHashCode?.let { am.findChildAccount(it) }
+            subUserList.postValue(myUd.indexHashCode?.let { am.findChildAccount(it) })
         }
     }
 
